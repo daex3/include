@@ -18,7 +18,7 @@ Pixels read_png(char *path) {
 	png_infop info;
 	png_bytepp rows;
 
-	re_assert(f = fopen(path, "rb"), ERROR"fopen"),
+	re_assert((f = fopen(path, "rb")), ERROR"fopen"),
 
 	png	= png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0),
 	info	= png_create_info_struct(png),
@@ -61,8 +61,8 @@ Pixels read_png(char *path) {
 		break;
 	}
 
-	for(size_t y = 0, i = 0; y < r.size.y; ++y)
-		for(size_t x = 0; x < r.size.x; ++x, ++i) {
+	for(int y = 0, i = 0; y < r.size.y; ++y)
+		for(int x = 0; x < r.size.x; ++x, ++i) {
 			Px	 *p = &r.x[i];
 			png_byte *c = &rows[y][x * bytes];
 

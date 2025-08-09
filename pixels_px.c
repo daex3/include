@@ -42,9 +42,9 @@ static void px_assert(_Bool condition, char *message) {
 
 static void alloc_px_x(Pixels *px, size_t total) {
 	px_assert(
-		px->x = malloc(
+		(px->x = malloc(
 			(px->max = total) * sizeof(Px)
-		),
+		)),
 		ERROR"malloc"
 	);
 }
