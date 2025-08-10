@@ -30,12 +30,14 @@ Pixels read_png(char *path) {
 
 	Pixels r;
 
-	r.orig_size.y = r.size.y	= png_get_image_height(png, info),
-	r.orig_size.x = r.size.x	= png_get_image_width(png, info),
-	r.len = r.max			= r.size.x * r.size.y,
-	r.x				= malloc(r.len * sizeof(Px)),
-	r.orig_x			= NULL,
-	r.with_grid			= 1,
+	r.with_grid = 1,
+	r.orig_size = r.size = (D2){
+		png_get_image_width(png, info),
+		png_get_image_height(png, info)
+	},
+	r.x = malloc(
+		(r.max = r.len = r.size.x * r.size.y) * sizeof(Px)
+	),
 
 	re_assert(r.x, ERROR"malloc");
 
@@ -61,18 +63,20 @@ Pixels read_png(char *path) {
 		break;
 	}
 
-	for(int y = 0, i = 0; y < r.size.y; ++y)
-		for(int x = 0; x < r.size.x; ++x, ++i) {
+	D2 a = { };
+	for(size_t i = 0; a.y < r.size.y; ++a.y)
+		for(a.x = 0; a.x < r.size.x; ++a.x, ++i) {
 			Px	 *p = &r.x[i];
-			png_byte *c = &rows[y][x * bytes];
+			png_byte *c = &rows[a.y][a.x * bytes];
 
-			p->color.r = *c,
-			p->color.g = c[1],
-			p->color.b = c[2],
-			p->color.a = c[3],
+			p->color = (RGBA){
+				*c,
+				c[1],
+				c[2],
+				bytes == 4 ? c[3] : 255
+			};
 
-			p->pos.x = x,
-			p->pos.y = y;
+			p->pos = a;
 		}
 
 	png_destroy_read_struct(&png, &info, 0),

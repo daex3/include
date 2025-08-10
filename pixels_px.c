@@ -49,6 +49,7 @@ static void alloc_px_x(Pixels *px, size_t total) {
 	);
 }
 
+// Slow
 size_t get_orig_pixel_index_at_pos(Pixels *px, D2 *pos, size_t total) {
 	for(size_t i = 0; i < total; ++i) {
 		Px *p = &px->orig_x[i];
@@ -61,8 +62,7 @@ size_t get_orig_pixel_index_at_pos(Pixels *px, D2 *pos, size_t total) {
 }
 
 void resize_pixels(Pixels *px, D2 *new) {
-	px->size.y = new->y,
-	px->size.x = new->x;
+	px->size = *new;
 
 	{
 		size_t total = new->x * new->y;
@@ -92,7 +92,7 @@ void resize_pixels(Pixels *px, D2 *new) {
 				(pos.y * px->orig_size.y + new->y / 2) / new->y
 			};
 
-			// Only grid is optimized
+			// Only grid is optimized: Needs Hash
 			if (px->with_grid)
 				o = &px->orig_x[o_pos.y * px->orig_size.x + o_pos.x];
 			else {
@@ -104,11 +104,8 @@ void resize_pixels(Pixels *px, D2 *new) {
 				o = &px->orig_x[i];
 			}
 
-			p->color.r = o->color.r,
-			p->color.g = o->color.g,
-			p->color.b = o->color.b,
+			p->color = o->color,
 
-			p->pos.x = pos.x,
-			p->pos.y = pos.y;
+			p->pos = pos;
 		}
 }
