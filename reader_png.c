@@ -29,7 +29,7 @@ Pixels read_png(char *path) {
 
 	rows = png_get_rows(png, info);
 
-	Pixels r;
+	Pixels r = { };
 
 	r.with_grid = 1,
 	r.orig_size = r.size = (D2){

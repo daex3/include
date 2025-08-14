@@ -103,7 +103,7 @@ void resize_pixels(Pixels *px, D2 *new) {
 			else {
 				int i = get_orig_pixel_index_at_pos(px, &o_pos, total);
 
-				if (i == (int)-1)
+				if (i == -1)
 					continue;
 
 				o = &px->orig_x[i];
