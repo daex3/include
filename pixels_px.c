@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 
 #pragma once
 
@@ -27,20 +28,24 @@ typedef struct {
 		orig_size;
 	Px	*orig_x,
 		*x;
-	size_t max, len;
+	int max, len;
 } Pixels;
 
 
 // Resizal bullshit here v
 static void px_assert(_Bool condition, char *message) {
 	if (!condition)
+#ifdef ERR_HANDLE
+		ERR_HANDLE;
+#else
 		perror(message),
 		exit(-1);
+#endif
 }
 
 #define ERROR "\x1b[31mError:\x1b[m "
 
-static void alloc_px_x(Pixels *px, size_t total) {
+static void alloc_px_x(Pixels *px, int total) {
 	px_assert(
 		(px->x = malloc(
 			(px->max = total) * sizeof(Px)
@@ -50,8 +55,8 @@ static void alloc_px_x(Pixels *px, size_t total) {
 }
 
 // Slow
-size_t get_orig_pixel_index_at_pos(Pixels *px, D2 *pos, size_t total) {
-	for(size_t i = 0; i < total; ++i) {
+int get_orig_pixel_index_at_pos(Pixels *px, D2 *pos, int total) {
+	for(int i = 0; i < total; ++i) {
 		Px *p = &px->orig_x[i];
 
 		if (p->pos.x == pos->x && p->pos.y == pos->y)
@@ -65,7 +70,7 @@ void resize_pixels(Pixels *px, D2 *new) {
 	px->size = *new;
 
 	{
-		size_t total = new->x * new->y;
+		int total = new->x * new->y;
 
 		if (!total)
 			return;
@@ -80,7 +85,7 @@ void resize_pixels(Pixels *px, D2 *new) {
 			alloc_px_x(px, total);
 	}
 	
-	size_t total = px->orig_size.x * px->orig_size.y;
+	int total = px->orig_size.x * px->orig_size.y;
 	D2 pos = { };
 	for(; pos.y < new->y; ++pos.y, pos.x = 0)
 		for(; pos.x < new->x; ++pos.x) {
@@ -96,9 +101,9 @@ void resize_pixels(Pixels *px, D2 *new) {
 			if (px->with_grid)
 				o = &px->orig_x[o_pos.y * px->orig_size.x + o_pos.x];
 			else {
-				size_t i = get_orig_pixel_index_at_pos(px, &o_pos, total);
+				int i = get_orig_pixel_index_at_pos(px, &o_pos, total);
 
-				if (i == (size_t)-1)
+				if (i == (int)-1)
 					continue;
 
 				o = &px->orig_x[i];

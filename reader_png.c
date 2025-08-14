@@ -4,9 +4,10 @@
 #include <pixels_px.c>
 
 static void re_assert(_Bool condition, char *message) {
-	if (!condition)
-		perror(message),
+	if (!condition) {
+		perror(message);
 		exit(-1);
+	}
 }
 
 #define ERROR "\x1b[31mError:\x1b[m "
@@ -18,7 +19,7 @@ Pixels read_png(char *path) {
 	png_infop info;
 	png_bytepp rows;
 
-	re_assert((f = fopen(path, "rb")), ERROR"fopen"),
+	re_assert((f = fopen(path, "rb")), ERROR"fopen");
 
 	png	= png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0),
 	info	= png_create_info_struct(png),
@@ -41,40 +42,50 @@ Pixels read_png(char *path) {
 
 	re_assert(r.x, ERROR"malloc");
 
-	int bytes = 0;
-
-	switch (png_get_color_type(png, info)) {
-	    case PNG_COLOR_TYPE_RGB:
-		bytes = 3;
-
-		break;
-	    case PNG_COLOR_TYPE_RGBA:
-		bytes = 4;
-
-		break;
-	    case PNG_COLOR_TYPE_PALETTE:
-	    case PNG_COLOR_TYPE_GRAY:
-		bytes = 1;
-
-		break;
-	    case PNG_COLOR_TYPE_GRAY_ALPHA:
-		bytes = 2;
-
-		break;
-	}
-
 	D2 a = { };
 	for(size_t i = 0; a.y < r.size.y; ++a.y)
 		for(a.x = 0; a.x < r.size.x; ++a.x, ++i) {
 			Px	 *p = &r.x[i];
-			png_byte *c = &rows[a.y][a.x * bytes];
+			png_byte *c;
 
-			p->color = (RGBA){
-				*c,
-				c[1],
-				c[2],
-				bytes == 4 ? c[3] : 255
-			};
+			switch (png_get_color_type(png, info)) {
+				case PNG_COLOR_TYPE_RGB:
+					c = &rows[a.y][a.x * 3],
+					p->color = (RGBA){
+						*c,
+						c[1],
+						c[2],
+						255
+					};
+
+					break;
+				case PNG_COLOR_TYPE_RGBA:
+					c = &rows[a.y][a.x * 4],
+					p->color = (RGBA){
+						*c,
+						c[1],
+						c[2],
+						c[3]
+					};
+
+					break;
+				case PNG_COLOR_TYPE_PALETTE:
+				case PNG_COLOR_TYPE_GRAY:
+					c = &rows[a.y][a.x],
+					p->color = (RGBA){
+						*c,
+						*c,
+						*c,
+						255
+					};
+
+					break;
+			
+				// TODO: Support
+				case PNG_COLOR_TYPE_GRAY_ALPHA:
+
+					break;
+			}
 
 			p->pos = a;
 		}
